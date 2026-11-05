@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexHR | Executive HR Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+
+<div class="app-wrapper">
+
+    <!-- Mobile Drawer Backdrop Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- 1. Collapsible Sidebar Navigation -->
+    <aside class="sidebar" id="appSidebar">
+        <div class="sidebar-header">
+            <a href="/dashboard" class="brand">
+                <div class="brand-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <div class="brand-info">
+                    <span class="brand-title">NexHR</span>
+                    <span class="brand-subtitle">Enterprise HRMS</span>
+                </div>
+            </a>
+            <button type="button" class="sidebar-toggle-btn" id="sidebarToggleBtn" title="Toggle Sidebar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+        </div>
+
+        <div class="sidebar-content">
+            <div>
+                <div class="nav-group-title">Main Menu</div>
+                <ul class="nav-list">
+                    <li>
+                        <a href="/dashboard" class="nav-link active" title="Dashboard">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                            <span class="nav-link-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/employees" class="nav-link" title="All Employees">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <polyline points="16 11 18 13 22 9"></polyline>
+                            </svg>
+                            <span class="nav-link-text">All Employees</span>
+                        </a>
+                    </li>
+                    <li th:if="${role == 'HR'}">
+                        <a href="/employees/new" class="nav-link" title="Add Employee">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <line x1="20" y1="8" x2="20" y2="14"></line>
+                                <line x1="23" y1="11" x2="17" y2="11"></line>
+                            </svg>
+                            <span class="nav-link-text">Add Employee</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/departments" class="nav-link" title="Departments">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            </svg>
+                            <span class="nav-link-text">Departments</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div>
+                <div class="nav-group-title">HR Operations</div>
+                <ul class="nav-list">
+                    <li>
+                        <a href="javascript:void(0)" onclick="openModal(document.getElementById('attendanceModal'))" class="nav-link" title="Attendance">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span class="nav-link-text">Attendance</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)" onclick="openModal(document.getElementById('leaveModal'))" class="nav-link" title="Leave Management">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <span class="nav-link-text">Leave Management</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)" onclick="openModal(document.getElementById('reportsModal'))" class="nav-link" title="Reports & Analytics">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                            <span class="nav-link-text">Reports & Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)" onclick="openModal(document.getElementById('settingsModal'))" class="nav-link" title="Settings">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                            <span class="nav-link-text">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar" th:text="${username != null && username.length() > 0 ? username.substring(0, 1).toUpperCase() : 'U'}">H</div>
+                <div class="user-details">
+                    <span class="user-name" th:text="${username != null ? username : 'Administrator'}">hr</span>
+                    <span class="user-role-badge" th:text="${role != null ? role : 'HR'}">HR</span>
+                </div>
+            </div>
+            <a href="/logout" class="btn btn-secondary btn-sm" style="width: 100%;" title="Sign Out">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+
+        <!-- 2. Sticky Header Topbar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open mobile menu">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+
+                <!-- Feature C: Global Search -->
+                <div class="global-search-container">
+                    <div class="search-input-wrapper">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" class="global-search-input" id="globalSearchInput" placeholder="Quick search employee, role, dept..." autocomplete="off">
+                        <span class="search-shortcut">⌘K</span>
+                    </div>
+                    <div class="search-results-dropdown" id="globalSearchResults"></div>
+                </div>
+            </div>
+
+            <div class="topbar-right">
+                <!-- Feature E: Dark / Light Theme Toggle -->
+                <button type="button" class="header-icon-btn" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+                    <span id="themeIcon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </span>
+                </button>
+
+                <!-- Feature D: Notifications Bell -->
+                <div style="position: relative;">
+                    <button type="button" class="header-icon-btn" id="notificationsBtn" title="System Notifications">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <span class="notification-badge">3</span>
+                    </button>
+
+                    <div class="notifications-dropdown" id="notificationsDropdown">
+                        <div class="notifications-header">
+                            <span class="notifications-title">Notifications</span>
+                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--secondary);">3 unread</span>
+                        </div>
+                        <div class="notifications-body">
+                            <div class="notification-item">
+                                <div class="notification-icon-wrap" style="background: var(--success-light); color: var(--success);">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.85rem; font-weight: 600;">New hire onboarded</div>
+                                    <div style="font-size: 0.78rem; color: var(--text-muted);">Aarav Sharma joined Engineering & IT team.</div>
+                                    <div class="notification-time">10 minutes ago</div>
+                                </div>
+                            </div>
+                            <div class="notification-item">
+                                <div class="notification-icon-wrap" style="background: var(--warning-light); color: var(--warning);">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.85rem; font-weight: 600;">Leave application pending</div>
+                                    <div style="font-size: 0.78rem; color: var(--text-muted);">Priya Sundaram submitted 3 days sick leave.</div>
+                                    <div class="notification-time">2 hours ago</div>
+                                </div>
+                            </div>
+                            <div class="notification-item">
+                                <div class="notification-icon-wrap" style="background: var(--secondary-light); color: var(--secondary);">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.85rem; font-weight: 600;">Department headcount updated</div>
+                                    <div style="font-size: 0.78rem; color: var(--text-muted);">Product & Design headcount increased by 15%.</div>
+                                    <div class="notification-time">Yesterday</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Badge -->
+                <div style="display: flex; align-items: center; gap: 8px; margin-left: 6px;">
+                    <div class="user-avatar" style="width: 38px; height: 38px;" th:text="${username != null && username.length() > 0 ? username.substring(0, 1).toUpperCase() : 'A'}">A</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+
+            <!-- Hero Welcome Header -->
+            <div class="page-header-row">
+                <div>
+                    <h1 class="page-title">
+                        <span>HR Executive Dashboard</span>
+                    </h1>
+                    <p class="page-subtitle">Welcome back, <strong th:text="${username}">hr</strong>. Overview of organizational headcount, active workforce, and department distribution.</p>
+                </div>
+                <div class="page-actions">
+                    <span class="status-pill badge-active">
+                        <span class="status-dot"></span>
+                        <span>Role: <strong th:text="${role}">HR</strong></span>
+                    </span>
+                    <a href="/employees" class="btn btn-secondary btn-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                        <span>View Directory</span>
+                    </a>
+                    <a th:if="${role == 'HR'}" href="/employees/new" class="btn btn-primary btn-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>Add Employee</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Feature G: Quick Actions Shortcuts -->
+            <div class="quick-actions-bar">
+                <div class="quick-actions-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    <span>Quick Shortcuts</span>
+                </div>
+                <div class="quick-actions-btns">
+                    <a th:if="${role == 'HR'}" href="/employees/new" class="btn btn-primary btn-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                        <span>Add New Employee</span>
+                    </a>
+                    <a href="/employees" class="btn btn-secondary btn-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                        <span>View All Employees</span>
+                    </a>
+                    <a href="/departments" class="btn btn-secondary btn-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                        <span>Manage Departments</span>
+                    </a>
+                    <a href="/employees/export/csv" class="btn btn-accent btn-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>Export CSV Roster</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 4. Statistics KPI Cards (6 Display Cards) -->
+            <div class="stats-grid">
+                <!-- 1. Total Employees -->
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-label">Total Workforce</span>
+                        <div class="stat-icon primary">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        </div>
+                    </div>
+                    <div class="stat-value" th:text="${totalEmployees}">12</div>
+                    <div class="stat-footer">
+                        <span class="trend-badge trend-up">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                            <span>+100% Verified</span>
+                        </span>
+                        <span>Total headcount</span>
+                    </div>
+                </div>
+
+                <!-- 2. Active Employees -->
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-label">Active Staff</span>
+                        <div class="stat-icon success">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="stat-value" th:text="${activeEmployees}">10</div>
+                    <div class="stat-footer">
+                        <span class="trend-badge trend-up" th:text="${totalEmployees > 0 ? (activeEmployees * 100 / totalEmployees) + '%' : '0%'}">83%</span>
+                        <span>Operational capacity</span>
+                    </div>
+                </div>
+
+                <!-- 3. Inactive Employees -->
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-label">Inactive / Former</span>
+                        <div class="stat-icon danger">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                        </div>
+                    </div>
+                    <div class="stat-value" th:text="${inactiveEmployees}">1</div>
+                    <div class="stat-footer">
+                        <span class="trend-badge trend-neutral">Offboarded</span>
+                        <span>Archived profiles</span>
+                    </div>
+                </div>
+
+                <!-- 4. Total Departments -->
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-label">Departments</span>
+                        <div class="stat-icon info">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                        </div>
+                    </div>
+                    <div class="stat-value" th:text="${totalDepartments}">6</div>
+                    <div class="stat-footer">
+                        <span class="trend-badge trend-up">Active divisions</span>
+                        <span>Cross-functional</span>
+                    </div>
+                </div>
+
+                <!-- 5. New Hires This Month -->
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-label">Recent Hires</span>
+                        <div class="stat-icon accent">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                        </div>
+                    </div>
+                    <div class="stat-value" th:text="${newHiresCount}">4</div>
+                    <div class="stat-footer">
+                        <span class="trend-badge trend-up">+2 this qtr</span>
+                        <span>Growth trajectory</span>
+                    </div>
+                </div>
+
+                <!-- 6. Employees on Leave -->
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-label">On Leave</span>
+                        <div class="stat-icon warning">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        </div>
+                    </div>
+                    <div class="stat-value" th:text="${onLeaveEmployees}">1</div>
+                    <div class="stat-footer">
+                        <span class="trend-badge trend-neutral">Approved absence</span>
+                        <span>Returning soon</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Visualizations Section -->
+            <div class="dashboard-charts-grid">
+                <!-- 1. Employee Growth & Hiring Trend SVG Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Workforce Growth & Hiring Velocity</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Monthly cumulative employee growth trajectory</div>
+                        </div>
+                        <span class="chart-badge">Trailing 6 Months</span>
+                    </div>
+
+                    <div class="chart-container">
+                        <svg class="growth-chart-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="growthGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#6366F1" stop-opacity="0.45"/>
+                                    <stop offset="100%" stop-color="#6366F1" stop-opacity="0.0"/>
+                                </linearGradient>
+                            </defs>
+                            <!-- Grid lines -->
+                            <line class="chart-gridline" x1="0" y1="40" x2="600" y2="40"/>
+                            <line class="chart-gridline" x1="0" y1="90" x2="600" y2="90"/>
+                            <line class="chart-gridline" x1="0" y1="140" x2="600" y2="140"/>
+                            <line class="chart-gridline" x1="0" y1="180" x2="600" y2="180"/>
+
+                            <!-- Area and Line -->
+                            <path class="chart-area-path" d="M 30,170 Q 120,150 200,130 T 350,85 T 480,55 T 570,35 L 570,180 L 30,180 Z"/>
+                            <path class="chart-line-path" d="M 30,170 Q 120,150 200,130 T 350,85 T 480,55 T 570,35"/>
+
+                            <!-- Data Points -->
+                            <circle class="chart-dot" cx="30" cy="170"><title>Month 1: 3 employees</title></circle>
+                            <circle class="chart-dot" cx="150" cy="145"><title>Month 2: 5 employees</title></circle>
+                            <circle class="chart-dot" cx="260" cy="115"><title>Month 3: 7 employees</title></circle>
+                            <circle class="chart-dot" cx="370" cy="80"><title>Month 4: 9 employees</title></circle>
+                            <circle class="chart-dot" cx="480" cy="55"><title>Month 5: 11 employees</title></circle>
+                            <circle class="chart-dot" cx="570" cy="35"><title>Current: 12 employees</title></circle>
+                        </svg>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-light); margin-top: 10px; padding: 0 10px;">
+                        <span>May 2024</span>
+                        <span>Jun 2024</span>
+                        <span>Jul 2024</span>
+                        <span>Aug 2024</span>
+                        <span>Sep 2024</span>
+                        <span>Active (Now)</span>
+                    </div>
+                </div>
+
+                <!-- 2. Department-wise Employee Distribution -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Department Distribution</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Headcount by business division</div>
+                        </div>
+                        <span class="chart-badge">Live Split</span>
+                    </div>
+
+                    <div class="bar-chart-container">
+                        <div class="bar-item" th:each="entry, stat : ${deptDistribution}">
+                            <div class="bar-info">
+                                <span th:text="${entry.key}">Engineering & IT</span>
+                                <span><strong th:text="${entry.value}">4</strong> staff</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill"
+                                     th:classappend="${stat.index % 6 == 0 ? 'eng' : (stat.index % 6 == 1 ? 'hr' : (stat.index % 6 == 2 ? 'fin' : (stat.index % 6 == 3 ? 'prd' : (stat.index % 6 == 4 ? 'mkt' : 'ops'))))}"
+                                     th:style="'width: ' + (${totalEmployees > 0 ? (entry.value * 100 / totalEmployees) : 0}) + '%;'">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Hires Section -->
+            <div class="table-card">
+                <div class="table-toolbar">
+                    <div>
+                        <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-main);">Recently Added Team Members</div>
+                        <div style="font-size: 0.82rem; color: var(--text-muted);">Quick inspect latest additions to the organization</div>
+                    </div>
+                    <a href="/employees" class="btn btn-secondary btn-sm">
+                        <span>View All Employees</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>ID</th>
+                                <th>Department</th>
+                                <th>Designation</th>
+                                <th>Status</th>
+                                <th>Salary</th>
+                                <th style="text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="emp, stat : ${recentEmployees}">
+                                <td>
+                                    <div class="emp-identity">
+                                        <div class="emp-avatar" th:classappend="'avatar-color-' + (${stat.index % 6})" th:text="${emp.initials}">AS</div>
+                                        <div class="emp-meta">
+                                            <span class="emp-name" th:text="${emp.name}">Aarav Sharma</span>
+                                            <span class="emp-desig" th:text="${emp.email}">aarav@enterprise.com</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="emp-code" th:text="${emp.employeeCode}">EMP-001</span>
+                                </td>
+                                <td>
+                                    <span class="dept-pill" th:text="${emp.department != null ? emp.department.name : 'Unassigned'}">Engineering & IT</span>
+                                </td>
+                                <td th:text="${emp.designation}">Senior Cloud Architect</td>
+                                <td>
+                                    <span class="status-pill" th:classappend="${emp.statusBadgeClass}">
+                                        <span class="status-dot"></span>
+                                        <span th:text="${emp.status}">Active</span>
+                                    </span>
+                                </td>
+                                <td style="font-weight: 600;" th:text="${emp.formattedSalary}">$95,000.00</td>
+                                <td style="text-align: right;">
+                                    <div class="action-buttons" style="justify-content: flex-end;">
+                                        <button type="button" class="icon-action-btn view" title="View Full Profile"
+                                                th:data-id="${emp.id}"
+                                                th:data-name="${emp.name}"
+                                                th:data-code="${emp.employeeCode}"
+                                                th:data-email="${emp.email}"
+                                                th:data-phone="${emp.phone}"
+                                                th:data-salary="${emp.salary}"
+                                                th:data-salary-formatted="${emp.formattedSalary}"
+                                                th:data-dept="${emp.department != null ? emp.department.name : 'Unassigned'}"
+                                                th:data-desig="${emp.designation}"
+                                                th:data-joining-date="${emp.joiningDate}"
+                                                th:data-status="${emp.status}"
+                                                th:data-gender="${emp.gender}"
+                                                th:data-dob="${emp.dateOfBirth}"
+                                                th:data-address="${emp.address}"
+                                                th:data-initials="${emp.initials}"
+                                                onclick="handleProfileClick(this)">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                        </button>
+                                        <a th:if="${role == 'HR' or role == 'MANAGER'}" th:href="@{/employees/edit/{id}(id=${emp.id})}" class="icon-action-btn edit" title="Edit Employee">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     Shared Modals for SaaS Features
+     ========================================================================== -->
+
+<!-- Feature A: Employee Profile Modal -->
+<div class="modal-overlay" id="employeeProfileModal">
+    <div class="modal-box">
+        <div class="profile-cover">
+            <button type="button" class="modal-close-btn" style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.3); color: #fff;" onclick="closeModal(document.getElementById('employeeProfileModal'))">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <div class="profile-avatar-large" id="modalProfileAvatar">AS</div>
+        </div>
+        <div class="profile-content">
+            <div class="profile-name-row">
+                <div>
+                    <div class="profile-name" id="modalProfileName">Aarav Sharma</div>
+                    <div style="font-size: 0.88rem; color: var(--text-muted);" id="modalProfileDesig">Senior Cloud Architect</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="emp-code" id="modalProfileCode">EMP-001</span>
+                    <span class="status-pill badge-active" id="modalProfileStatus">Active</span>
+                </div>
+            </div>
+
+            <div class="profile-grid">
+                <div>
+                    <div class="profile-field-label">Department</div>
+                    <div class="profile-field-val" id="modalProfileDept">Engineering & IT</div>
+                </div>
+                <div>
+                    <div class="profile-field-label">Annual Salary</div>
+                    <div class="profile-field-val" id="modalProfileSalary">$95,000.00</div>
+                </div>
+                <div>
+                    <div class="profile-field-label">Official Email</div>
+                    <div class="profile-field-val" id="modalProfileEmail">aarav@enterprise.com</div>
+                </div>
+                <div>
+                    <div class="profile-field-label">Phone Number</div>
+                    <div class="profile-field-val" id="modalProfilePhone">+1 (555) 342-8901</div>
+                </div>
+                <div>
+                    <div class="profile-field-label">Date of Joining</div>
+                    <div class="profile-field-val" id="modalProfileJoiningDate">2022-03-15</div>
+                </div>
+                <div>
+                    <div class="profile-field-label">Gender</div>
+                    <div class="profile-field-val" id="modalProfileGender">Male</div>
+                </div>
+                <div>
+                    <div class="profile-field-label">Date of Birth</div>
+                    <div class="profile-field-val" id="modalProfileDob">1991-04-12</div>
+                </div>
+                <div>
+                    <div class="profile-field-label">Work Location</div>
+                    <div class="profile-field-val" id="modalProfileAddress">Corporate HQ</div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal(document.getElementById('employeeProfileModal'))">Close</button>
+                <a th:if="${role == 'HR' or role == 'MANAGER'}" id="modalProfileEditBtn" href="#" class="btn btn-primary btn-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    <span>Edit Profile</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Attendance Modal -->
+<div class="modal-overlay" id="attendanceModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="modal-title">Live Attendance Tracker</h3>
+            <button type="button" class="modal-close-btn" onclick="closeModal(document.getElementById('attendanceModal'))">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; text-align: center;">
+                <div style="padding: 12px; border-radius: var(--radius-md); background: var(--success-light); color: var(--success);">
+                    <div style="font-size: 1.4rem; font-weight: 800;">94.2%</div>
+                    <div style="font-size: 0.75rem; font-weight: 600;">On-Time Rate</div>
+                </div>
+                <div style="padding: 12px; border-radius: var(--radius-md); background: var(--secondary-light); color: var(--secondary);">
+                    <div style="font-size: 1.4rem; font-weight: 800;" th:text="${activeEmployees}">10</div>
+                    <div style="font-size: 0.75rem; font-weight: 600;">Checked In</div>
+                </div>
+                <div style="padding: 12px; border-radius: var(--radius-md); background: var(--warning-light); color: var(--warning);">
+                    <div style="font-size: 1.4rem; font-weight: 800;" th:text="${onLeaveEmployees}">1</div>
+                    <div style="font-size: 0.75rem; font-weight: 600;">On Leave</div>
+                </div>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">Biometric & single-sign-on attendance synchronization is active. All employee check-ins are logged in real-time with shift timestamps.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary btn-sm" onclick="closeModal(document.getElementById('attendanceModal'))">Dismiss</button>
+        </div>
+    </div>
+</div>
+
+<!-- Leave Management Modal -->
+<div class="modal-overlay" id="leaveModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="modal-title">Leave Management</h3>
+            <button type="button" class="modal-close-btn" onclick="closeModal(document.getElementById('leaveModal'))">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div style="font-size: 0.88rem; font-weight: 600; margin-bottom: 12px;">Active Leave Applications:</div>
+            <div style="padding: 12px 16px; border: 1px solid var(--card-border); border-radius: var(--radius-md); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-weight: 600;">Priya Sundaram</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);">Medical Leave • 3 Days (Pending approval)</div>
+                </div>
+                <span class="status-pill badge-leave">Pending</span>
+            </div>
+            <div style="padding: 12px 16px; border: 1px solid var(--card-border); border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-weight: 600;">Fatima Al-Mansoor</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);">Annual Vacation • 5 Days (Approved)</div>
+                </div>
+                <span class="status-pill badge-active">Approved</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal(document.getElementById('leaveModal'))">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Reports & Analytics Modal -->
+<div class="modal-overlay" id="reportsModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="modal-title">Reports & Organizational Analytics</h3>
+            <button type="button" class="modal-close-btn" onclick="closeModal(document.getElementById('reportsModal'))">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">Download comprehensive audit logs, payroll distributions, and employee rosters directly:</p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <a href="/employees/export/csv" class="btn btn-secondary" style="justify-content: space-between;">
+                    <span style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        <span>Full Employee Census (CSV)</span>
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--secondary); font-weight: 700;">Download</span>
+                </a>
+                <a href="/departments" class="btn btn-secondary" style="justify-content: space-between;">
+                    <span style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                        <span>Department Distribution Breakdown</span>
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--secondary); font-weight: 700;">View</span>
+                </a>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary btn-sm" onclick="closeModal(document.getElementById('reportsModal'))">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="modal-title">System Settings</h3>
+            <button type="button" class="modal-close-btn" onclick="closeModal(document.getElementById('settingsModal'))">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <div style="font-weight: 600;">Dark Theme Appearance</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Toggle high-contrast enterprise dark mode</div>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('themeToggleBtn').click()">Toggle Theme</button>
+                </div>
+                <div style="border-top: 1px solid var(--card-border); padding-top: 14px; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <div style="font-weight: 600;">Email Notifications</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Receive alerts on employee profile changes</div>
+                    </div>
+                    <input type="checkbox" checked style="width: 20px; height: 20px; accent-color: var(--secondary);">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary btn-sm" onclick="closeModal(document.getElementById('settingsModal'))">Save Preferences</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>
