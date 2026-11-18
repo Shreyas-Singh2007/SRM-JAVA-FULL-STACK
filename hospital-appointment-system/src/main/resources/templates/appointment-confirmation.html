@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Appointment Confirmed — ' + ${appointment.bookingReference})}"></head>
+<body style="min-height: 100vh; display: flex; flex-direction: column;">
+
+<nav th:replace="~{fragments/layout :: public_nav}"></nav>
+<div th:replace="~{fragments/layout :: omni_search_modal}"></div>
+
+<div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 16px;">
+    <div class="card" style="width: 100%; max-width: 620px; padding: 40px; box-shadow: var(--shadow-xl); border-top: 6px solid var(--success);">
+        <div style="text-align: center; margin-bottom: 28px;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--success-light); color: var(--success); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <h2 style="font-size: 1.85rem; margin-bottom: 6px; color: var(--text);">Appointment Confirmed!</h2>
+            <p style="font-size: 0.95rem;">Your clinical consultation slot has been reserved in PulseCare records.</p>
+        </div>
+
+        <!-- Digital Pass Card -->
+        <div style="background: var(--bg); border: 2px dashed var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 28px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 16px;">
+                <div>
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--muted);">Booking Reference Code</div>
+                    <div style="font-size: 1.4rem; font-weight: 800; color: var(--primary); letter-spacing: 0.05em;" th:text="${appointment.bookingReference}">APT-2026-1049</div>
+                </div>
+                <span class="badge badge-confirmed" style="font-size: 0.85rem;" th:text="${appointment.status}">CONFIRMED</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 0.9rem;">
+                <div>
+                    <span style="color: var(--muted); font-size: 0.8rem; display: block;">Physician</span>
+                    <strong style="font-size: 1.05rem;" th:text="${appointment.doctor.name}">Dr. Sarah Jenkins</strong>
+                    <div style="color: var(--primary); font-size: 0.82rem;" th:text="${appointment.doctor.specialization}">Cardiology</div>
+                </div>
+                <div>
+                    <span style="color: var(--muted); font-size: 0.8rem; display: block;">Consultation Fee</span>
+                    <strong style="font-size: 1.15rem; color: var(--text);" th:text="'$' + ${#numbers.formatDecimal(appointment.consultationFee, 1, 0)}">$150</strong>
+                    <div style="color: var(--muted); font-size: 0.82rem;">Payable at clinic desk</div>
+                </div>
+                <div>
+                    <span style="color: var(--muted); font-size: 0.8rem; display: block;">Date</span>
+                    <strong style="color: var(--text);" th:text="${appointment.formattedDate}">Nov 22, 2026</strong>
+                </div>
+                <div>
+                    <span style="color: var(--muted); font-size: 0.8rem; display: block;">Time Window</span>
+                    <strong style="color: var(--primary);" th:text="${appointment.timeSlot}">10:00 AM</strong>
+                </div>
+                <div style="grid-column: span 2; border-top: 1px solid var(--border); padding-top: 12px;">
+                    <span style="color: var(--muted); font-size: 0.8rem; display: block;">Patient</span>
+                    <strong th:text="${appointment.patient.name}">John Doe</strong>
+                    <div style="font-size: 0.82rem; color: var(--muted);" th:text="${appointment.patient.phone} + ' • ' + ${appointment.patient.email}">9876543210 • john@example.com</div>
+                </div>
+                <div style="grid-column: span 2;">
+                    <span style="color: var(--muted); font-size: 0.8rem; display: block;">Reason for Visit</span>
+                    <div th:text="${appointment.reason}">Cardiovascular check-up and consultation.</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+            <button type="button" class="btn btn-outline" style="flex: 1;" onclick="window.print()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                <span>Print Pass</span>
+            </button>
+            <a href="/my-appointments" class="btn btn-outline-primary" style="flex: 1;">My Appointments</a>
+            <a href="/dashboard/patient" class="btn btn-primary" style="flex: 1;">Go to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: public_footer}"></footer>
+
+</body>
+</html>

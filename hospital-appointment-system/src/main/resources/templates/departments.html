@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Department Management')}"></head>
+<body>
+
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: app_sidebar('departments')}"></aside>
+
+    <div class="main-content">
+        <header th:replace="~{fragments/layout :: top_header('Departments')}"></header>
+        <div th:replace="~{fragments/layout :: omni_search_modal}"></div>
+
+        <div class="dashboard-body">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px;">
+                <div>
+                    <h1 style="font-size: 1.85rem; margin-bottom: 4px;">Clinical Departments & Specialties</h1>
+                    <p style="font-size: 0.95rem;">Manage hospital medical divisions, diagnostic units, and clinical leadership.</p>
+                </div>
+
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('addDeptModal').classList.add('open')">
+                    + Add Department
+                </button>
+            </div>
+
+            <!-- Alerts -->
+            <div th:if="${successMessage != null}" class="alert alert-success" th:text="${successMessage}">
+                Department saved.
+            </div>
+            <div th:if="${errorMessage != null}" class="alert alert-danger" th:text="${errorMessage}">
+                Error message.
+            </div>
+
+            <!-- Department List Table Card -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div class="card-header" style="padding: 20px 24px; margin-bottom: 0;">
+                    <h3 class="card-title">Active Clinical Units</h3>
+                    <span class="badge" style="background: var(--primary-light); color: var(--primary);" th:text="'Total: ' + ${#lists.size(departments)}">Total: 7</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Department Name</th>
+                                <th>Clinical Leadership</th>
+                                <th>Overview / Description</th>
+                                <th style="text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="d : ${departments}">
+                                <td style="font-weight: 700; color: var(--muted);" th:text="${d.id}">1</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                                        </div>
+                                        <span style="font-weight: 700; font-size: 1.05rem;" th:text="${d.name}">Cardiology</span>
+                                    </div>
+                                </td>
+                                <td style="font-weight: 600; color: var(--text);" th:text="${d.headDoctor}">Dr. Sarah Jenkins</td>
+                                <td style="color: var(--muted); font-size: 0.88rem; max-width: 400px;" th:text="${d.description}">
+                                    Comprehensive cardiovascular treatment.
+                                </td>
+                                <td style="text-align: right;">
+                                    <form th:action="@{/departments/{id}/delete(id=${d.id})}" method="post" style="margin: 0;"
+                                          onsubmit="return confirm('Delete department ' + this.getAttribute('data-name') + '?');"
+                                          th:data-name="${d.name}">
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Department (Preserves existing form contract: name, description) -->
+<div class="modal-backdrop" id="addDeptModal">
+    <div class="modal-dialog" style="max-width: 500px;">
+        <div class="modal-header">
+            <h3 style="font-size: 1.25rem;">Add Clinical Department</h3>
+            <button type="button" class="btn-icon" style="background:none; border:none; cursor:pointer;" onclick="document.getElementById('addDeptModal').classList.remove('open')">✕</button>
+        </div>
+
+        <form action="/departments/save" method="post">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="deptName">Department Name</label>
+                    <input type="text" id="deptName" name="name" class="form-control" placeholder="Enter department name" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="headDoctor">Head of Department / Lead Physician</label>
+                    <input type="text" id="headDoctor" name="headDoctor" class="form-control" placeholder="e.g. Dr. Jane Smith, MD">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="deptDesc">Description</label>
+                    <textarea id="deptDesc" name="description" class="form-control" placeholder="Enter clinical focus and treatment description..."></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('addDeptModal').classList.remove('open')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Department</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

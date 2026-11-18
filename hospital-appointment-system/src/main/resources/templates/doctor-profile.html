@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head(${doctor.name} + ' — Specialist Profile')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: public_nav}"></nav>
+<div th:replace="~{fragments/layout :: omni_search_modal}"></div>
+
+<main style="padding: 48px 0 80px;">
+    <div class="container">
+        <!-- Breadcrumb Navigation -->
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--muted); margin-bottom: 28px;">
+            <a href="/">Home</a>
+            <span>/</span>
+            <a href="/doctors/directory">Doctors</a>
+            <span>/</span>
+            <span style="color: var(--text); font-weight: 600;" th:text="${doctor.name}">Dr. Sarah Jenkins</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 360px 1fr; gap: 36px; align-items: start;">
+            <!-- Left Sticky Card -->
+            <div class="card" style="padding: 28px; position: sticky; top: 100px;">
+                <div style="border-radius: var(--radius-lg); overflow: hidden; height: 320px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
+                    <img th:src="${doctor.imageUrl}" th:alt="${doctor.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+
+                <h2 style="font-size: 1.5rem; margin-bottom: 4px;" th:text="${doctor.name}">Dr. Sarah Jenkins</h2>
+                <div style="color: var(--primary); font-weight: 700; font-size: 0.95rem; margin-bottom: 8px;" th:text="${doctor.specialization}">Cardiology</div>
+                <div style="color: var(--muted); font-size: 0.88rem; margin-bottom: 20px;" th:text="${doctor.qualification}">MD, FACC</div>
+
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 20px; padding: 8px 12px; background: var(--bg); border-radius: var(--radius-sm);">
+                    <span style="color: #f59e0b; font-size: 1.1rem;">★</span>
+                    <strong th:text="${doctor.rating}">4.95</strong>
+                    <span style="color: var(--muted); font-size: 0.82rem;" th:text="'(' + ${doctor.reviewsCount} + ' Verified Patient Reviews)'">(184 Reviews)</span>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                        <span style="color: var(--muted);">Experience</span>
+                        <strong th:text="${doctor.experienceYears} + ' Years'">16 Years</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                        <span style="color: var(--muted);">Consultation Fee</span>
+                        <strong style="color: var(--text); font-size: 1.1rem;" th:text="'$' + ${#numbers.formatDecimal(doctor.consultationFee, 1, 0)}">$150</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                        <span style="color: var(--muted);">Direct Phone</span>
+                        <strong th:text="${doctor.phone}">+1 (555) 234-5671</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--muted);">Email</span>
+                        <strong th:text="${doctor.email}">doc@pulsecare.org</strong>
+                    </div>
+                </div>
+
+                <a th:href="@{/book-appointment(doctorId=${doctor.id})}" class="btn btn-primary btn-lg" style="width: 100%;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <span>Book Appointment</span>
+                </a>
+            </div>
+
+            <!-- Right Detail Section -->
+            <div style="display: flex; flex-direction: column; gap: 28px;">
+                <!-- Bio & Overview -->
+                <div class="card" style="padding: 32px;">
+                    <h3 style="font-size: 1.35rem; margin-bottom: 16px; color: var(--primary);">Clinical Biography & Overview</h3>
+                    <p style="font-size: 1rem; line-height: 1.8; color: var(--text); margin-bottom: 24px;" th:text="${doctor.bio}">
+                        Dr. Sarah Jenkins is an acclaimed cardiologist with extensive expertise in interventional procedures, preventive medicine, and patient-first diagnostics.
+                    </p>
+
+                    <h4 style="font-size: 1.1rem; margin-bottom: 12px;">Department Affiliations</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <span th:each="dept : ${doctor.departments}" class="badge" style="background: var(--primary-light); color: var(--primary); padding: 6px 14px; font-size: 0.85rem;" th:text="${dept.name}">Cardiology</span>
+                    </div>
+                </div>
+
+                <!-- Schedule & Availability -->
+                <div class="card" style="padding: 32px;">
+                    <h3 style="font-size: 1.35rem; margin-bottom: 16px;">Clinic Hours & Available Days</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                        <div style="background: var(--bg); padding: 18px; border-radius: var(--radius-md);">
+                            <div style="font-size: 0.82rem; color: var(--muted); text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Consultation Days</div>
+                            <div style="font-weight: 700; font-size: 1.1rem; color: var(--primary);" th:text="${doctor.availableDays}">Mon, Wed, Fri</div>
+                        </div>
+                        <div style="background: var(--bg); padding: 18px; border-radius: var(--radius-md);">
+                            <div style="font-size: 0.82rem; color: var(--muted); text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">OPD Timings</div>
+                            <div style="font-weight: 700; font-size: 1.1rem; color: var(--text);" th:text="${doctor.availableTime}">09:00 AM - 04:00 PM</div>
+                        </div>
+                    </div>
+
+                    <div style="padding: 16px 20px; background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent); border-radius: 4px;">
+                        <div style="font-weight: 600; font-size: 0.92rem; color: var(--text);">Instant Slot Reservation</div>
+                        <div style="font-size: 0.85rem; color: var(--muted); margin-top: 2px;">
+                            You can directly view and pick this doctor's available 30-minute consultation slots in our interactive booking engine.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Patient Experience Standards -->
+                <div class="card" style="padding: 32px;">
+                    <h3 style="font-size: 1.35rem; margin-bottom: 16px;">Clinical Standards</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px;">
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="color: var(--success); font-weight: bold; font-size: 1.2rem;">✓</div>
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.92rem;">Board Certified</div>
+                                <div style="font-size: 0.82rem; color: var(--muted);">Highest clinical credentials</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="color: var(--success); font-weight: bold; font-size: 1.2rem;">✓</div>
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.92rem;">Paperless Flow</div>
+                                <div style="font-size: 0.82rem; color: var(--muted);">Digital prescriptions & history</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="color: var(--success); font-weight: bold; font-size: 1.2rem;">✓</div>
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.92rem;">No Long Queues</div>
+                                <div style="font-size: 0.82rem; color: var(--muted);">Confirmed time-window visits</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: public_footer}"></footer>
+
+</body>
+</html>

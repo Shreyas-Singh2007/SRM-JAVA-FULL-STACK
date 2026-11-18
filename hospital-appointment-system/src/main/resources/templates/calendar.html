@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Appointment Calendar Overview')}"></head>
+<body>
+
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: app_sidebar('calendar')}"></aside>
+
+    <div class="main-content">
+        <header th:replace="~{fragments/layout :: top_header('Appointment Calendar')}"></header>
+        <div th:replace="~{fragments/layout :: omni_search_modal}"></div>
+
+        <div class="dashboard-body">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px;">
+                <div>
+                    <h1 style="font-size: 1.85rem; margin-bottom: 4px;">Clinical Schedule & Calendar</h1>
+                    <p style="font-size: 0.95rem;">Visual monthly calendar distribution of hospital patient appointments.</p>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <a href="/book-appointment" class="btn btn-primary">+ Schedule Visit</a>
+                </div>
+            </div>
+
+            <!-- Calendar Container Card -->
+            <div class="calendar-wrapper">
+                <div class="calendar-header">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <button type="button" class="btn btn-outline btn-icon" id="prevMonthBtn">‹</button>
+                        <h2 style="font-size: 1.45rem; min-width: 200px; text-align: center;" id="monthYearTitle">November 2026</h2>
+                        <button type="button" class="btn btn-outline btn-icon" id="nextMonthBtn">›</button>
+                    </div>
+
+                    <!-- Legend -->
+                    <div style="display: flex; align-items: center; gap: 14px; font-size: 0.82rem;">
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <span style="width: 10px; height: 10px; background: #0F766E; border-radius: 50%;"></span>
+                            <span>Confirmed</span>
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <span style="width: 10px; height: 10px; background: #F59E0B; border-radius: 50%;"></span>
+                            <span>Pending</span>
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <span style="width: 10px; height: 10px; background: #16A34A; border-radius: 50%;"></span>
+                            <span>Completed</span>
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <span style="width: 10px; height: 10px; background: #EF4444; border-radius: 50%;"></span>
+                            <span>Cancelled</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="calendar-grid" id="calendarDaysHeader">
+                    <div class="calendar-day-header">Sun</div>
+                    <div class="calendar-day-header">Mon</div>
+                    <div class="calendar-day-header">Tue</div>
+                    <div class="calendar-day-header">Wed</div>
+                    <div class="calendar-day-header">Thu</div>
+                    <div class="calendar-day-header">Fri</div>
+                    <div class="calendar-day-header">Sat</div>
+                </div>
+
+                <div class="calendar-grid" id="calendarGridBody" style="margin-top: 8px;">
+                    <!-- Rendered dynamically by JavaScript with backend appointment data -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Appointment Detail Modal for Calendar Click -->
+<div class="modal-backdrop" id="calEventModal">
+    <div class="modal-dialog" style="max-width: 480px;">
+        <div class="modal-header">
+            <h3 style="font-size: 1.2rem;">Appointment Details</h3>
+            <button type="button" class="btn-icon" style="background:none; border:none; cursor:pointer;" onclick="document.getElementById('calEventModal').classList.remove('open')">✕</button>
+        </div>
+        <div class="modal-body" id="calEventBody" style="font-size: 0.92rem;">
+            <!-- Populated on click -->
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="document.getElementById('calEventModal').classList.remove('open')">Close</button>
+            <a href="/appointments" class="btn btn-primary" id="calEventLink">Go to Appointments</a>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden appointment data dump for calendar JS -->
+<script th:inline="javascript">
+/*<![CDATA[*/
+const rawAppointments = [
+    /*[# th:each="a : ${appointments}"]*/
+    {
+        id: /*[[${a.id}]]*/ 1,
+        ref: /*[[${a.bookingReference}]]*/ 'APT-1001',
+        doctor: /*[[${a.doctor.name}]]*/ 'Dr. Jenkins',
+        patient: /*[[${a.patient.name}]]*/ 'John Doe',
+        date: /*[[${a.appointmentDate.toString()}]]*/ '2026-11-20',
+        time: /*[[${a.timeSlot}]]*/ '10:00 AM',
+        status: /*[[${a.status}]]*/ 'CONFIRMED',
+        reason: /*[[${a.reason}]]*/ 'Consultation'
+    },
+    /*[/]*/
+];
+/*]]>*/
+
+let currentCalDate = new Date();
+
+function renderCalendar() {
+    const year = currentCalDate.getFullYear();
+    const month = currentCalDate.getMonth();
+
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+    document.getElementById('monthYearTitle').innerText = `${monthNames[month]} ${year}`;
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const body = document.getElementById('calendarGridBody');
+    body.innerHTML = '';
+
+    // Empty cells before first day
+    for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-cell';
+        emptyCell.style.opacity = '0.35';
+        body.appendChild(emptyCell);
+    }
+
+    // Days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell';
+
+        const dayStr = String(day).padStart(2, '0');
+        const monthStr = String(month + 1).padStart(2, '0');
+        const dateKey = `${year}-${monthStr}-${dayStr}`;
+
+        const isToday = new Date().toISOString().split('T')[0] === dateKey;
+        if (isToday) {
+            cell.style.borderColor = 'var(--primary)';
+            cell.style.boxShadow = '0 0 0 2px var(--primary-light)';
+        }
+
+        cell.innerHTML = `<div class="calendar-cell-date" style="${isToday ? 'color: var(--primary); font-weight:800;' : ''}">${day}</div>`;
+
+        // Match appointments for this day
+        const dayApts = rawAppointments.filter(a => a.date === dateKey);
+        dayApts.forEach(apt => {
+            const pill = document.createElement('div');
+            pill.className = 'calendar-pill';
+
+            let bg = '#0F766E';
+            if (apt.status === 'PENDING') bg = '#F59E0B';
+            else if (apt.status === 'COMPLETED') bg = '#16A34A';
+            else if (apt.status === 'CANCELLED') bg = '#EF4444';
+
+            pill.style.background = bg;
+            pill.style.color = '#ffffff';
+            pill.style.cursor = 'pointer';
+            pill.title = `${apt.time}: ${apt.patient} w/ ${apt.doctor}`;
+            pill.innerText = `${apt.time} • ${apt.patient}`;
+
+            pill.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showCalendarEventModal(apt);
+            });
+
+            cell.appendChild(pill);
+        });
+
+        body.appendChild(cell);
+    }
+}
+
+function showCalendarEventModal(apt) {
+    const modal = document.getElementById('calEventModal');
+    const content = document.getElementById('calEventBody');
+
+    content.innerHTML = `
+        <div style="margin-bottom: 12px;">
+            <span style="font-size:0.75rem; text-transform:uppercase; color:var(--muted); font-weight:700;">Reference</span>
+            <div style="font-weight:700; color:var(--primary); font-size:1.1rem;">${apt.ref}</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div>
+                <span style="font-size:0.78rem; color:var(--muted);">Doctor</span>
+                <div style="font-weight:600;">${apt.doctor}</div>
+            </div>
+            <div>
+                <span style="font-size:0.78rem; color:var(--muted);">Patient</span>
+                <div style="font-weight:600;">${apt.patient}</div>
+            </div>
+            <div>
+                <span style="font-size:0.78rem; color:var(--muted);">Date & Time</span>
+                <div style="font-weight:600;">${apt.date} at ${apt.time}</div>
+            </div>
+            <div>
+                <span style="font-size:0.78rem; color:var(--muted);">Status</span>
+                <div><span class="badge badge-${apt.status.toLowerCase()}">${apt.status}</span></div>
+            </div>
+        </div>
+        <div>
+            <span style="font-size:0.78rem; color:var(--muted);">Reason</span>
+            <div style="color:var(--text);">${apt.reason}</div>
+        </div>
+    `;
+
+    document.getElementById('calEventLink').href = `/appointments/${apt.id}/confirmation`;
+    modal.classList.add('open');
+}
+
+document.getElementById('prevMonthBtn').addEventListener('click', () => {
+    currentCalDate.setMonth(currentCalDate.getMonth() - 1);
+    renderCalendar();
+});
+
+document.getElementById('nextMonthBtn').addEventListener('click', () => {
+    currentCalDate.setMonth(currentCalDate.getMonth() + 1);
+    renderCalendar();
+});
+
+document.addEventListener('DOMContentLoaded', renderCalendar);
+</script>
+
+</body>
+</html>

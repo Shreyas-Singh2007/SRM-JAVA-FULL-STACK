@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Secure Portal Sign In')}"></head>
+<body style="min-height: 100vh; display: flex; flex-direction: column;">
+
+<nav th:replace="~{fragments/layout :: public_nav}"></nav>
+<div th:replace="~{fragments/layout :: omni_search_modal}"></div>
+
+<div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 16px;">
+    <div class="card" style="width: 100%; max-width: 480px; padding: 36px; box-shadow: var(--shadow-xl);">
+        <div style="text-align: center; margin-bottom: 28px;">
+            <div class="logo-icon" style="width: 48px; height: 48px; margin: 0 auto 14px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </div>
+            <h2 style="font-size: 1.7rem; margin-bottom: 6px;">Sign In to PulseCare</h2>
+            <p style="font-size: 0.9rem;">Access your appointments, patient records, and medical schedules.</p>
+        </div>
+
+        <!-- Feedback Alerts -->
+        <div th:if="${errorMessage != null}" class="alert alert-danger" th:text="${errorMessage}">
+            Invalid credentials.
+        </div>
+        <div th:if="${successMessage != null}" class="alert alert-success" th:text="${successMessage}">
+            Success message.
+        </div>
+        <div th:if="${infoMessage != null}" class="alert alert-info" th:text="${infoMessage}">
+            Logged out successfully.
+        </div>
+
+        <!-- Role Selector Tabs -->
+        <div style="display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 4px; margin-bottom: 24px;">
+            <button type="button" class="role-tab btn btn-sm" data-role="PATIENT" 
+                    style="flex: 1; border-radius: var(--radius-sm); font-weight: 600;" 
+                    th:classappend="${selectedRole == 'PATIENT' || selectedRole == null} ? 'btn-primary' : 'btn-outline'">
+                Patient
+            </button>
+            <button type="button" class="role-tab btn btn-sm" data-role="DOCTOR" 
+                    style="flex: 1; border-radius: var(--radius-sm); font-weight: 600;" 
+                    th:classappend="${selectedRole == 'DOCTOR'} ? 'btn-primary' : 'btn-outline'">
+                Doctor
+            </button>
+            <button type="button" class="role-tab btn btn-sm" data-role="ADMIN" 
+                    style="flex: 1; border-radius: var(--radius-sm); font-weight: 600;" 
+                    th:classappend="${selectedRole == 'ADMIN'} ? 'btn-primary' : 'btn-outline'">
+                Admin
+            </button>
+        </div>
+
+        <form action="/login" method="post" id="loginForm">
+            <input type="hidden" name="role" id="roleInput" th:value="${selectedRole != null ? selectedRole : 'PATIENT'}">
+            <input type="hidden" name="redirect" th:value="${redirect}">
+
+            <div class="form-group">
+                <label class="form-label" for="username">Username or Email</label>
+                <div class="input-icon-wrapper">
+                    <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <input type="text" id="username" name="username" class="form-control" 
+                           placeholder="Enter your username or email" th:value="${prevUsername}" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label class="form-label" for="password" style="margin-bottom: 0;">Password</label>
+                    <a href="/forgot-password" style="font-size: 0.82rem; color: var(--primary);">Forgot Password?</a>
+                </div>
+                <div class="input-icon-wrapper">
+                    <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <input type="password" id="password" name="password" class="form-control" 
+                           placeholder="••••••••" required>
+                    <button type="button" class="password-toggle-btn" data-target="password" title="Toggle password visibility">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--text); cursor: pointer;">
+                    <input type="checkbox" name="rememberMe" checked style="width: auto; margin: 0;">
+                    <span>Remember my session</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-bottom: 20px;">
+                Sign In to Account
+            </button>
+
+            <!-- Quick Demo Credential Pills -->
+            <div style="background: var(--bg); border: 1px dashed var(--border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 20px;">
+                <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--muted); margin-bottom: 8px;">
+                    Quick 1-Click Demo Credentials:
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <button type="button" class="btn btn-outline btn-sm demo-cred-btn" 
+                            data-u="admin" data-p="admin123" data-r="ADMIN">Admin</button>
+                    <button type="button" class="btn btn-outline btn-sm demo-cred-btn" 
+                            data-u="dr.sarah" data-p="doctor123" data-r="DOCTOR">Doctor</button>
+                    <button type="button" class="btn btn-outline btn-sm demo-cred-btn" 
+                            data-u="patient" data-p="patient123" data-r="PATIENT">Patient</button>
+                </div>
+            </div>
+
+            <div style="text-align: center; font-size: 0.9rem; color: var(--muted);">
+                Don't have a patient account? 
+                <a href="/register" style="color: var(--primary); font-weight: 600;">Register as Patient</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: public_footer}"></footer>
+
+<script>
+document.querySelectorAll('.role-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.role-tab').forEach(t => {
+            t.classList.remove('btn-primary');
+            t.classList.add('btn-outline');
+        });
+        tab.classList.remove('btn-outline');
+        tab.classList.add('btn-primary');
+        document.getElementById('roleInput').value = tab.getAttribute('data-role');
+    });
+});
+
+document.querySelectorAll('.demo-cred-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.getElementById('username').value = btn.getAttribute('data-u');
+        document.getElementById('password').value = btn.getAttribute('data-p');
+        const role = btn.getAttribute('data-r');
+        document.getElementById('roleInput').value = role;
+        
+        // sync role buttons
+        document.querySelectorAll('.role-tab').forEach(t => {
+            if (t.getAttribute('data-role') === role) {
+                t.classList.remove('btn-outline');
+                t.classList.add('btn-primary');
+            } else {
+                t.classList.remove('btn-primary');
+                t.classList.add('btn-outline');
+            }
+        });
+    });
+});
+</script>
+
+</body>
+</html>

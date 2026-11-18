@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Head Fragment -->
+<head th:fragment="html_head(pageTitle)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle != null ? pageTitle + ' — PulseCare Health' : 'PulseCare — Hospital Management & Appointment System'}">PulseCare Health</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230F766E'><path d='M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z'/></svg>">
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script th:src="@{/js/app.js}" defer></script>
+</head>
+
+<!-- Public Navigation Fragment -->
+<nav th:fragment="public_nav" class="navbar">
+    <div class="container nav-container">
+        <a href="/" class="brand-logo">
+            <div class="logo-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </div>
+            <span>Pulse<span>Care</span></span>
+        </a>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="/" class="nav-link">Home</a></li>
+            <li><a href="/doctors/directory" class="nav-link">Find Doctors</a></li>
+            <li><a href="/departments" class="nav-link">Departments</a></li>
+            <li><a href="/book-appointment" class="nav-link">Book Appointment</a></li>
+            <li><a href="/contact" class="nav-link">Contact</a></li>
+            <li th:if="${session.currentUser != null}">
+                <a th:if="${session.userRole == 'PATIENT'}" href="/dashboard/patient" class="nav-link" style="color: var(--primary); font-weight:700;">My Dashboard</a>
+                <a th:if="${session.userRole == 'DOCTOR'}" href="/dashboard/doctor" class="nav-link" style="color: var(--primary); font-weight:700;">Doctor Portal</a>
+                <a th:if="${session.userRole == 'ADMIN'}" href="/dashboard/admin" class="nav-link" style="color: var(--primary); font-weight:700;">Admin Center</a>
+            </li>
+        </ul>
+
+        <div class="nav-actions">
+            <!-- Global Search Trigger -->
+            <button class="btn btn-outline btn-icon open-search-trigger" title="Quick Search (Ctrl+K)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+
+            <!-- Theme Toggle -->
+            <button class="btn btn-outline btn-icon theme-toggle-btn" title="Toggle Dark/Light Mode">
+                <span class="theme-icon-moon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </span>
+                <span class="theme-icon-sun" style="display:none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                </span>
+            </button>
+
+            <!-- Auth Buttons -->
+            <th:block th:if="${session.currentUser == null}">
+                <a href="/login" class="btn btn-outline">Sign In</a>
+                <a href="/book-appointment" class="btn btn-primary">Book Visit</a>
+            </th:block>
+            <th:block th:if="${session.currentUser != null}">
+                <a href="/logout" class="btn btn-outline" style="border-color: var(--danger); color: var(--danger);" title="Sign Out">Sign Out</a>
+            </th:block>
+
+            <button class="mobile-nav-toggle" id="mobileNavToggle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- Sidebar Fragment for Dashboard Pages -->
+<aside th:fragment="app_sidebar(activePage)" class="sidebar">
+    <a href="/" class="sidebar-brand">
+        <div class="logo-icon" style="width:36px; height:36px; background:linear-gradient(135deg, var(--primary), var(--secondary)); border-radius:10px; display:flex; align-items:center; justify-content:center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        </div>
+        <span>Pulse<span>Care</span></span>
+    </a>
+
+    <ul class="sidebar-menu">
+        <li class="sidebar-category">Dashboards</li>
+        <li>
+            <a href="/dashboard/patient" class="sidebar-link" th:classappend="${activePage == 'patient_dashboard'} ? 'active' : ''">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span>Patient Dashboard</span>
+            </a>
+        </li>
+        <li>
+            <a href="/dashboard/doctor" class="sidebar-link" th:classappend="${activePage == 'doctor_dashboard'} ? 'active' : ''">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                <span>Doctor Portal</span>
+            </a>
+        </li>
+        <li>
+            <a href="/dashboard/admin" class="sidebar-link" th:classappend="${activePage == 'admin_dashboard'} ? 'active' : ''">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                <span>Administration</span>
+            </a>
+        </li>
+
+        <li class="sidebar-category">Clinical Operations</li>
+        <li>
+            <a href="/book-appointment" class="sidebar-link" th:classappend="${activePage == 'book_appointment'} ? 'active' : ''">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                <span>Book Appointment</span>
+            </a>
+        </li>
+        <li>
+            <a href="/my-appointments" class="sidebar-link" th:classappend="${activePage == 'my_appointments'} ? 'active' : ''">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span>My Appointments</span>
+            </a>
+        </li>
+        <li>
+            <a href="/calendar" class="sidebar-link" th:classappend="${activePage == 'calendar'} ? 'active' : ''">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span>Appointment Calendar</span>
+            </a>
+        </li>
+
+        <li class="sidebar-category">Hospital Directory</li>
+        <li>
+            <a href="/doctors" class="sidebar-link" th:classappend="${activePage == 'doctors'} ? 'active' : ''">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span>Doctor Management</span>
+            </a>
+        </li>
+        <li>
+            <a href="/patients" class="sidebar-link" th:classappend="${activePage == 'patients'} ? 'active' : ''">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span>Patient Directory</span>
+            </a>
+        </li>
+        <li>
+            <a href="/departments" class="sidebar-link" th:classappend="${activePage == 'departments'} ? 'active' : ''">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                <span>Departments</span>
+            </a>
+        </li>
+        <li>
+            <a href="/appointments" class="sidebar-link" th:classappend="${activePage == 'appointments'} ? 'active' : ''">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                <span>All Appointments</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="sidebar-footer">
+        <div class="user-mini-profile">
+            <div class="user-avatar" th:text="${session.userFullName != null ? #strings.substring(session.userFullName,0,1) : 'U'}">A</div>
+            <div style="flex:1; min-width:0;">
+                <div style="font-weight:600; font-size:0.88rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" 
+                     th:text="${session.userFullName != null ? session.userFullName : 'PulseCare User'}">Administrator</div>
+                <div style="font-size:0.75rem; color:#85abb5; text-transform:uppercase;" 
+                     th:text="${session.userRole != null ? session.userRole : 'Online'}">ADMIN</div>
+            </div>
+            <a href="/logout" title="Sign Out" style="color:#ef4444; padding:4px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </a>
+        </div>
+    </div>
+</aside>
+
+<!-- Top Header for Dashboard Pages -->
+<header th:fragment="top_header(pageTitle)" class="top-header">
+    <div style="display:flex; align-items:center; gap:16px;">
+        <button id="sidebarToggle" class="btn btn-outline btn-icon" style="display:none;" title="Toggle Sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <h2 style="font-size:1.35rem; font-weight:700; color:var(--text);" th:text="${pageTitle}">Dashboard</h2>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:14px;">
+        <!-- Global Search Trigger -->
+        <button class="btn btn-outline open-search-trigger" style="font-size:0.88rem; padding:8px 14px; gap:8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span>Search records...</span>
+            <kbd style="font-size:0.75rem; background:var(--primary-light); color:var(--primary); padding:2px 6px; border-radius:4px;">Ctrl+K</kbd>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button class="btn btn-outline btn-icon theme-toggle-btn" title="Toggle Dark/Light Mode">
+            <span class="theme-icon-moon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </span>
+            <span class="theme-icon-sun" style="display:none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            </span>
+        </button>
+
+        <a href="/book-appointment" class="btn btn-primary btn-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>New Booking</span>
+        </a>
+    </div>
+</header>
+
+<!-- Omnisearch Modal Fragment -->
+<div th:fragment="omni_search_modal" class="modal-backdrop" id="searchModal">
+    <div class="modal-dialog" style="max-width: 640px;">
+        <div class="modal-header" style="padding:16px 20px;">
+            <div style="display:flex; align-items:center; gap:10px; width:100%;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="omniSearchInput" placeholder="Search doctors, patient names, reference codes, departments..." 
+                       style="width:100%; border:none; outline:none; font-size:1.05rem; background:transparent; color:var(--text);">
+            </div>
+            <button type="button" class="close-search-trigger" style="background:none; border:none; cursor:pointer; font-size:1.2rem; color:var(--muted);">✕</button>
+        </div>
+        <div class="modal-body" id="omniSearchResults" style="padding:16px 20px; max-height:400px; overflow-y:auto;">
+            <div style="text-align:center; padding:24px 0; color:var(--muted); font-size:0.9rem;">
+                Type doctor names (e.g. <em>Sarah</em>), patient names, or booking reference (e.g. <em>APT-2026</em>)...
+            </div>
+        </div>
+        <div class="modal-footer" style="padding:10px 20px; font-size:0.8rem; color:var(--muted); justify-content:space-between;">
+            <span>Pro tip: Press <kbd style="background:var(--border); padding:2px 5px; border-radius:3px;">ESC</kbd> to exit search</span>
+            <span>PulseCare Fast Query</span>
+        </div>
+    </div>
+</div>
+
+<!-- Public Footer Fragment -->
+<footer th:fragment="public_footer" style="background:var(--sidebar); color:#e2e8f0; padding:64px 0 32px; border-top:1px solid rgba(255,255,255,0.08); margin-top:80px;">
+    <div class="container">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:40px; margin-bottom:48px;">
+            <div>
+                <a href="/" class="brand-logo" style="color:#ffffff; margin-bottom:16px;">
+                    <div class="logo-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                    </div>
+                    <span>Pulse<span style="color:var(--secondary);">Care</span></span>
+                </a>
+                <p style="color:#94a3b8; font-size:0.9rem; line-height:1.6;">
+                    Leading enterprise hospital management and patient appointment platform delivering compassionate, world-class healthcare.
+                </p>
+                <div style="margin-top:16px; font-size:0.85rem; color:#38bdf8;">
+                    Emergency Helpline: <strong>+1 (800) 555-PULSE</strong>
+                </div>
+            </div>
+
+            <div>
+                <h4 style="color:#ffffff; font-size:1.05rem; margin-bottom:18px;">Quick Links</h4>
+                <ul style="list-style:none; display:flex; flex-direction:column; gap:10px; font-size:0.9rem;">
+                    <li><a href="/doctors/directory" style="color:#94a3b8;">Find a Specialist</a></li>
+                    <li><a href="/book-appointment" style="color:#94a3b8;">Book an Appointment</a></li>
+                    <li><a href="/departments" style="color:#94a3b8;">Clinical Departments</a></li>
+                    <li><a href="/calendar" style="color:#94a3b8;">Doctor Schedules</a></li>
+                    <li><a href="/contact" style="color:#94a3b8;">Emergency & Location</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 style="color:#ffffff; font-size:1.05rem; margin-bottom:18px;">Portals & Access</h4>
+                <ul style="list-style:none; display:flex; flex-direction:column; gap:10px; font-size:0.9rem;">
+                    <li><a href="/login?role=PATIENT" style="color:#94a3b8;">Patient Portal</a></li>
+                    <li><a href="/login?role=DOCTOR" style="color:#94a3b8;">Doctor Workplace</a></li>
+                    <li><a href="/login?role=ADMIN" style="color:#94a3b8;">Hospital Administration</a></li>
+                    <li><a href="/my-appointments" style="color:#94a3b8;">Check Booking Status</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 style="color:#ffffff; font-size:1.05rem; margin-bottom:18px;">Accreditation</h4>
+                <p style="color:#94a3b8; font-size:0.88rem; line-height:1.6;">
+                    Certified Joint Commission International (JCI) Accredited Hospital. HIPAA compliant and encrypted clinical workflows.
+                </p>
+                <div style="margin-top:16px; display:inline-block; padding:6px 12px; background:rgba(20,184,166,0.15); color:var(--secondary); border-radius:6px; font-size:0.8rem; font-weight:600;">
+                    24/7 Clinical Support
+                </div>
+            </div>
+        </div>
+
+        <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:24px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; font-size:0.85rem; color:#64748b;">
+            <div>© 2026 PulseCare Health System. All Rights Reserved.</div>
+            <div style="display:flex; gap:20px;">
+                <a href="/contact" style="color:#94a3b8;">Privacy Policy</a>
+                <a href="/contact" style="color:#94a3b8;">Terms of Service</a>
+                <a href="/contact" style="color:#94a3b8;">Support Center</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</html>

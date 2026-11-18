@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Patient Administration')}"></head>
+<body>
+
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: app_sidebar('patients')}"></aside>
+
+    <div class="main-content">
+        <header th:replace="~{fragments/layout :: top_header('Patient Directory')}"></header>
+        <div th:replace="~{fragments/layout :: omni_search_modal}"></div>
+
+        <div class="dashboard-body">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px;">
+                <div>
+                    <h1 style="font-size: 1.85rem; margin-bottom: 4px;">Patient Directory & Records</h1>
+                    <p style="font-size: 0.95rem;">Manage hospital registered patients, clinical history, and demographic profiles.</p>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <a href="/admin/export/patients" class="btn btn-outline">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>Export CSV</span>
+                    </a>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('addPatientModal').classList.add('open')">
+                        + Register Patient
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div th:if="${successMessage != null}" class="alert alert-success" th:text="${successMessage}">
+                Patient saved.
+            </div>
+            <div th:if="${errorMessage != null}" class="alert alert-danger" th:text="${errorMessage}">
+                Error message.
+            </div>
+
+            <!-- Search Bar -->
+            <div class="card" style="margin-bottom: 24px; padding: 18px 24px;">
+                <form action="/patients" method="get" style="display: flex; gap: 12px; margin: 0;">
+                    <div class="input-icon-wrapper" style="flex: 1;">
+                        <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" name="search" class="form-control" placeholder="Search by patient name, email, or 10-digit phone..." th:value="${currentSearch}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    <a th:if="${currentSearch != null}" href="/patients" class="btn btn-outline">Reset</a>
+                </form>
+            </div>
+
+            <!-- Patient Table Card -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div class="card-header" style="padding: 20px 24px; margin-bottom: 0;">
+                    <h3 class="card-title">Patient Records</h3>
+                    <span class="badge" style="background: var(--primary-light); color: var(--primary);" th:text="'Total: ' + ${#lists.size(patients)}">Total: 4</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Blood Group</th>
+                                <th>Gender</th>
+                                <th>Registration Date</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${patients}">
+                                <td style="font-weight: 700; color: var(--muted);" th:text="${p.id}">1</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div class="user-avatar" style="width: 34px; height: 34px; font-size: 0.95rem;" th:text="${#strings.substring(p.name,0,1)}">J</div>
+                                        <div style="font-weight: 700; color: var(--text);" th:text="${p.name}">John Doe</div>
+                                    </div>
+                                </td>
+                                <td th:text="${p.email}">john.doe@example.com</td>
+                                <td style="font-weight: 600;" th:text="${p.phone}">9876543210</td>
+                                <td>
+                                    <span class="badge badge-completed" th:text="${p.bloodGroup}">O+</span>
+                                </td>
+                                <td th:text="${p.gender}">Male</td>
+                                <td style="color: var(--muted);" th:text="${p.registeredDate}">2026-11-18</td>
+                                <td style="text-align: right;">
+                                    <div style="display: inline-flex; gap: 8px;">
+                                        <a th:href="@{/patients/{id}(id=${p.id})}" class="btn btn-outline btn-sm">Dossier</a>
+                                        <form th:action="@{/patients/{id}/delete(id=${p.id})}" method="post" style="margin: 0;"
+                                              onsubmit="return confirm('Delete patient record for ' + this.getAttribute('data-name') + '?');"
+                                              th:data-name="${p.name}">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(patients)}">
+                                <td colspan="8" style="text-align: center; padding: 36px; color: var(--muted);">
+                                    No patient records found matching search.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Register Patient (Preserves existing /patients/save form contract) -->
+<div class="modal-backdrop" id="addPatientModal">
+    <div class="modal-dialog" style="max-width: 540px;">
+        <div class="modal-header">
+            <h3 style="font-size: 1.25rem;">Register New Patient</h3>
+            <button type="button" class="btn-icon" style="background:none; border:none; cursor:pointer;" onclick="document.getElementById('addPatientModal').classList.remove('open')">✕</button>
+        </div>
+
+        <form action="/patients/save" method="post">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="patName">Patient Name</label>
+                    <input type="text" id="patName" name="name" class="form-control" placeholder="e.g. Eleanor Vance" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label" for="patEmail">Email</label>
+                        <input type="email" id="patEmail" name="email" class="form-control" placeholder="eleanor@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="patPhone">Phone Number</label>
+                        <input type="text" id="patPhone" name="phone" class="form-control"
+                               pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label" for="patGender">Gender</label>
+                        <select id="patGender" name="gender" class="form-select">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="patBlood">Blood Group</label>
+                        <select id="patBlood" name="bloodGroup" class="form-select">
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="patEmergency">Emergency Contact</label>
+                    <input type="text" id="patEmergency" name="emergencyContact" class="form-control" placeholder="+1 (555) 000-0000">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('addPatientModal').classList.remove('open')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Patient</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

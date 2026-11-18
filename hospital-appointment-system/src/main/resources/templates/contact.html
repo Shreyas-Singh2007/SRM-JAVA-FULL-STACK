@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Contact & Clinical Support')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: public_nav}"></nav>
+<div th:replace="~{fragments/layout :: omni_search_modal}"></div>
+
+<main style="padding: 56px 0 80px;">
+    <div class="container">
+        <!-- Header -->
+        <div style="text-align: center; max-width: 650px; margin: 0 auto 48px;">
+            <div style="color: var(--primary); font-weight: 700; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em; margin-bottom: 8px;">PulseCare Support Center</div>
+            <h1 style="font-size: 2.6rem; margin-bottom: 12px;">Contact & Clinical Assistance</h1>
+            <p style="font-size: 1.05rem;">Our patient advocacy and emergency triage coordination team is available 24/7.</p>
+        </div>
+
+        <div th:if="${successMessage != null}" class="alert alert-success" th:text="${successMessage}">
+            Inquiry dispatched successfully.
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 36px; align-items: start;">
+            <!-- Contact Channels Card -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="card" style="border-left: 4px solid var(--danger);">
+                    <div style="display: flex; gap: 16px; align-items: center;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--danger-light); color: var(--danger); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--danger);">Emergency Hotline</div>
+                            <div style="font-size: 1.3rem; font-weight: 800; color: var(--text);">+1 (800) 555-PULSE</div>
+                            <div style="font-size: 0.82rem; color: var(--muted);">Toll-free immediate ambulance dispatch</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="border-left: 4px solid var(--primary);">
+                    <div style="display: flex; gap: 16px; align-items: center;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--primary);">Main Campus Location</div>
+                            <div style="font-size: 1.05rem; font-weight: 700; color: var(--text);">PulseCare Medical Pavilion</div>
+                            <div style="font-size: 0.85rem; color: var(--muted);">450 Longwood Avenue, Medical District, Boston, MA 02115</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="border-left: 4px solid var(--secondary);">
+                    <div style="display: flex; gap: 16px; align-items: center;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(20, 184, 166, 0.15); color: var(--secondary); display: flex; align-items: center; justify-content: center;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--secondary);">Clinical Desk Email</div>
+                            <div style="font-size: 1.05rem; font-weight: 700; color: var(--text);">inquiry@pulsecare.org</div>
+                            <div style="font-size: 0.85rem; color: var(--muted);">Response guaranteed within 2 business hours</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Functional Contact Inquiry Form -->
+            <div class="card" style="padding: 36px; box-shadow: var(--shadow-xl);">
+                <h3 style="font-size: 1.4rem; margin-bottom: 8px;">Send a Patient Inquiry</h3>
+                <p style="margin-bottom: 24px; font-size: 0.9rem;">Submit your general questions, health insurance verifications, or doctor coordination requests.</p>
+
+                <form action="/contact/submit" method="post">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label class="form-label" for="contactName">Your Name</label>
+                            <input type="text" id="contactName" name="name" class="form-control" placeholder="e.g. Sarah Connor" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="contactEmail">Email Address</label>
+                            <input type="email" id="contactEmail" name="email" class="form-control" placeholder="sarah@example.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="contactSubject">Subject / Department of Interest</label>
+                        <input type="text" id="contactSubject" name="subject" class="form-control" placeholder="e.g. Appointment rescheduling or insurance question" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="contactMessage">Message / Medical Inquiry</label>
+                        <textarea id="contactMessage" name="message" class="form-control" rows="5" placeholder="Detail your request or inquiry here..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                        <span>Submit Clinical Inquiry</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: public_footer}"></footer>
+
+</body>
+</html>

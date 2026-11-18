@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Doctor Administration')}"></head>
+<body>
+
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: app_sidebar('doctors')}"></aside>
+
+    <div class="main-content">
+        <header th:replace="~{fragments/layout :: top_header('Doctor Management')}"></header>
+        <div th:replace="~{fragments/layout :: omni_search_modal}"></div>
+
+        <div class="dashboard-body">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px;">
+                <div>
+                    <h1 style="font-size: 1.85rem; margin-bottom: 4px;">Doctor Management & Directory</h1>
+                    <p style="font-size: 0.95rem;">Configure hospital medical staff, specializations, credentials, and OPD schedules.</p>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <a href="/admin/export/doctors" class="btn btn-outline">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>Export CSV</span>
+                    </a>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('addDoctorModal').classList.add('open')">
+                        + Register Doctor
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div th:if="${successMessage != null}" class="alert alert-success" th:text="${successMessage}">
+                Doctor saved.
+            </div>
+            <div th:if="${errorMessage != null}" class="alert alert-danger" th:text="${errorMessage}">
+                Error message.
+            </div>
+
+            <!-- Doctor Directory Table Card -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div class="card-header" style="padding: 20px 24px; margin-bottom: 0;">
+                    <h3 class="card-title">Registered Physicians</h3>
+                    <span class="badge" style="background: var(--primary-light); color: var(--primary);" th:text="'Total: ' + ${#lists.size(doctors)}">Total: 6</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Doctor</th>
+                                <th>Specialization</th>
+                                <th>Qualification</th>
+                                <th>Experience</th>
+                                <th>Consultation Fee</th>
+                                <th>Department(s)</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="d : ${doctors}">
+                                <td th:text="${d.id}">1</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <img th:src="${d.imageUrl}" alt="" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                        <div>
+                                            <div style="font-weight: 700; color: var(--text);" th:text="${d.name}">Dr. Sarah Jenkins</div>
+                                            <div style="font-size: 0.78rem; color: var(--muted);" th:text="${d.email}">doc@pulsecare.org</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge" style="background: var(--primary-light); color: var(--primary);" th:text="${d.specialization}">Cardiology</span>
+                                </td>
+                                <td style="font-size: 0.88rem;" th:text="${d.qualification}">MD, FACC</td>
+                                <td style="font-weight: 600;" th:text="${d.experienceYears} + ' yrs'">16 yrs</td>
+                                <td style="font-weight: 700; color: var(--text);" th:text="'$' + ${#numbers.formatDecimal(d.consultationFee, 1, 0)}">$150</td>
+                                <td style="font-size: 0.85rem;" th:text="${d.departmentNames}">Cardiology</td>
+                                <td style="text-align: right;">
+                                    <div style="display: inline-flex; gap: 8px;">
+                                        <a th:href="@{/doctors/{id}/profile(id=${d.id})}" class="btn btn-outline btn-sm">Profile</a>
+                                        <form th:action="@{/doctors/{id}/delete(id=${d.id})}" method="post" style="margin: 0;"
+                                              onsubmit="return confirm('Are you sure you want to remove this physician?');">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Register Doctor (Preserves existing /doctors/save contract) -->
+<div class="modal-backdrop" id="addDoctorModal">
+    <div class="modal-dialog" style="max-width: 620px;">
+        <div class="modal-header">
+            <h3 style="font-size: 1.25rem;">Register New Medical Doctor</h3>
+            <button type="button" class="btn-icon" style="background:none; border:none; cursor:pointer;" onclick="document.getElementById('addDoctorModal').classList.remove('open')">✕</button>
+        </div>
+
+        <form action="/doctors/save" method="post">
+            <div class="modal-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label" for="docName">Doctor Name</label>
+                        <input type="text" id="docName" name="name" class="form-control" placeholder="e.g. Dr. Alexander Price" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="docEmail">Email Address</label>
+                        <input type="email" id="docEmail" name="email" class="form-control" placeholder="price@pulsecare.org" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label" for="docSpecialization">Specialization</label>
+                        <input type="text" id="docSpecialization" name="specialization" class="form-control" placeholder="e.g. Neuro-Oncology" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="docQualification">Qualifications</label>
+                        <input type="text" id="docQualification" name="qualification" class="form-control" placeholder="e.g. MD, PhD, Board Certified" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;">
+                    <div class="form-group">
+                        <label class="form-label" for="docExp">Experience (Years)</label>
+                        <input type="number" id="docExp" name="experienceYears" class="form-control" value="8" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="docFee">Fee ($)</label>
+                        <input type="number" id="docFee" name="consultationFee" class="form-control" value="120" min="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="docPhone">Phone</label>
+                        <input type="tel" id="docPhone" name="phone" class="form-control" value="+1 (555) 019-2834" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="departmentIds">Assign Clinical Departments</label>
+                    <select id="departmentIds" name="departmentIds" multiple class="form-select" style="min-height: 100px;" required>
+                        <option th:each="dept : ${departments}" th:value="${dept.id}" th:text="${dept.name}"></option>
+                    </select>
+                    <small style="color: var(--muted); display: block; margin-top: 4px;">Hold Ctrl / Cmd to select multiple departments.</small>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="docBio">Doctor Biography & Clinical Focus</label>
+                    <textarea id="docBio" name="bio" class="form-control" placeholder="Brief background of clinical research and specialization..."></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('addDoctorModal').classList.remove('open')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Doctor Profile</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

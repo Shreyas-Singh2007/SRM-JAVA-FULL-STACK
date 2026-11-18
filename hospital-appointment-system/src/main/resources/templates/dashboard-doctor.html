@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Doctor Clinical Workplace')}"></head>
+<body>
+
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: app_sidebar('doctor_dashboard')}"></aside>
+
+    <div class="main-content">
+        <header th:replace="~{fragments/layout :: top_header('Doctor Portal')}"></header>
+        <div th:replace="~{fragments/layout :: omni_search_modal}"></div>
+
+        <div class="dashboard-body">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px;">
+                <div>
+                    <h1 style="font-size: 1.85rem; margin-bottom: 4px;">
+                        Doctor Workplace — <span th:text="${doctor != null ? doctor.name : 'Attending Physician'}">Dr. Sarah Jenkins</span>
+                    </h1>
+                    <p style="font-size: 0.95rem;" th:text="${doctor != null ? doctor.specialization + ' • ' + doctor.qualification : 'Clinical Specialist'}">Interventional Cardiology</p>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <a href="/calendar" class="btn btn-outline">Schedule Calendar</a>
+                    <a href="/doctors" class="btn btn-primary">Profile Details</a>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 32px;">
+                <div class="stat-card">
+                    <div class="stat-icon-wrapper stat-icon-primary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" th:text="${totalAppointments}">0</div>
+                        <div class="stat-label">Assigned Patients</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon-wrapper stat-icon-accent">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" th:text="${todayAppointments}">0</div>
+                        <div class="stat-label">Today's Consultations</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon-wrapper stat-icon-warning">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" th:text="${pendingAppointments}">0</div>
+                        <div class="stat-label">Pending Requests</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon-wrapper stat-icon-success">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" th:text="${completedConsultations}">0</div>
+                        <div class="stat-label">Completed Consults</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient Queue Table with Status Update Toggles -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Patient Queue & Consultation Roster</h3>
+                    <span class="badge" style="background: var(--primary-light); color: var(--primary);" th:text="'Total: ' + ${totalAppointments}">Total: 4</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Booking Ref</th>
+                                <th>Patient Name</th>
+                                <th>Contact</th>
+                                <th>Date & Time</th>
+                                <th>Medical Reason</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Clinical Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="apt : ${appointments}">
+                                <td>
+                                    <strong style="color: var(--primary);" th:text="${apt.bookingReference}">APT-2026-1001</strong>
+                                </td>
+                                <td>
+                                    <div style="font-weight: 600;" th:text="${apt.patient.name}">John Doe</div>
+                                    <div style="font-size: 0.78rem; color: var(--muted);" th:text="'Blood: ' + ${apt.patient.bloodGroup} + ' • ' + ${apt.patient.gender}">Blood: O+ • Male</div>
+                                </td>
+                                <td>
+                                    <div th:text="${apt.patient.phone}">9876543210</div>
+                                    <div style="font-size: 0.78rem; color: var(--muted);" th:text="${apt.patient.email}">john@example.com</div>
+                                </td>
+                                <td>
+                                    <div style="font-weight: 600;" th:text="${apt.formattedDate}">Nov 20, 2026</div>
+                                    <div style="font-size: 0.8rem; color: var(--primary);" th:text="${apt.timeSlot}">10:00 AM</div>
+                                </td>
+                                <td style="max-width: 220px;">
+                                    <span style="font-size: 0.85rem;" th:text="${apt.reason}">Check-up</span>
+                                </td>
+                                <td>
+                                    <span class="badge" th:classappend="'badge-' + ${apt.status.toLowerCase()}" th:text="${apt.status}">CONFIRMED</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <div style="display: inline-flex; gap: 6px;">
+                                        <!-- Complete Consult Button -->
+                                        <form th:if="${!apt.isCompleted() && !apt.isCancelled()}" 
+                                              th:action="@{/appointments/{id}/status(id=${apt.id})}" method="post" style="margin:0;">
+                                            <input type="hidden" name="status" value="COMPLETED">
+                                            <input type="hidden" name="redirect" value="/dashboard/doctor">
+                                            <button type="submit" class="btn btn-success btn-sm" title="Mark Consultation Completed">
+                                                Complete
+                                            </button>
+                                        </form>
+
+                                        <!-- Confirm Button if Pending -->
+                                        <form th:if="${apt.isPending()}" 
+                                              th:action="@{/appointments/{id}/status(id=${apt.id})}" method="post" style="margin:0;">
+                                            <input type="hidden" name="status" value="CONFIRMED">
+                                            <input type="hidden" name="redirect" value="/dashboard/doctor">
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                Accept
+                                            </button>
+                                        </form>
+
+                                        <!-- Cancel / Reject Button -->
+                                        <form th:if="${!apt.isCancelled() && !apt.isCompleted()}" 
+                                              th:action="@{/appointments/{id}/cancel(id=${apt.id})}" method="post" style="margin:0;"
+                                              onsubmit="return confirm('Cancel consultation for patient?');">
+                                            <input type="hidden" name="redirect" value="/dashboard/doctor">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                Cancel
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(appointments)}">
+                                <td colspan="7" style="text-align: center; padding: 40px; color: var(--muted);">
+                                    No patient appointments assigned at this time.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

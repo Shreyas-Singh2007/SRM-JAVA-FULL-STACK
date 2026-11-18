@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Patient Record — ' + ${patient.name})}"></head>
+<body>
+
+<div class="app-shell">
+    <aside th:replace="~{fragments/layout :: app_sidebar('patients')}"></aside>
+
+    <div class="main-content">
+        <header th:replace="~{fragments/layout :: top_header('Patient Dossier')}"></header>
+        <div th:replace="~{fragments/layout :: omni_search_modal}"></div>
+
+        <div class="dashboard-body">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--muted); margin-bottom: 20px;">
+                <a href="/patients">Patients</a>
+                <span>/</span>
+                <span style="color: var(--text); font-weight: 600;" th:text="${patient.name}">John Doe</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 320px 1fr; gap: 28px; margin-bottom: 32px;">
+                <!-- Profile Card -->
+                <div class="card">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div class="user-avatar" style="width: 72px; height: 72px; font-size: 1.8rem; margin: 0 auto 12px;" th:text="${#strings.substring(patient.name,0,1)}">J</div>
+                        <h2 style="font-size: 1.4rem; margin-bottom: 2px;" th:text="${patient.name}">John Doe</h2>
+                        <div style="font-size: 0.85rem; color: var(--muted);" th:text="'Patient ID: #' + ${patient.id}">Patient ID: #1</div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;">
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                            <span style="color: var(--muted);">Email</span>
+                            <span style="font-weight: 600;" th:text="${patient.email}">john@example.com</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                            <span style="color: var(--muted);">Phone</span>
+                            <span style="font-weight: 600;" th:text="${patient.phone}">9876543210</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                            <span style="color: var(--muted);">Blood Group</span>
+                            <span class="badge badge-completed" th:text="${patient.bloodGroup}">O+</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                            <span style="color: var(--muted);">Gender</span>
+                            <span style="font-weight: 600;" th:text="${patient.gender}">Male</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                            <span style="color: var(--muted);">Emergency Contact</span>
+                            <span style="font-weight: 600;" th:text="${patient.emergencyContact}">+1 (555) 000-0000</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--muted);">Registered Date</span>
+                            <span style="font-weight: 600;" th:text="${patient.registeredDate}">2026-11-18</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consultation History -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Patient Consultation History</h3>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Ref</th>
+                                    <th>Physician</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                    <th>Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="a : ${appointments}">
+                                    <td>
+                                        <strong style="color: var(--primary);" th:text="${a.bookingReference}">APT-1001</strong>
+                                    </td>
+                                    <td th:text="${a.doctor.name}">Dr. Sarah Jenkins</td>
+                                    <td th:text="${a.formattedDate}">Nov 20, 2026</td>
+                                    <td th:text="${a.timeSlot}">10:00 AM</td>
+                                    <td>
+                                        <span class="badge" th:classappend="'badge-' + ${a.status.toLowerCase()}" th:text="${a.status}">CONFIRMED</span>
+                                    </td>
+                                    <td th:text="${a.reason}">Routine checkup</td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(appointments)}">
+                                    <td colspan="6" style="text-align: center; padding: 32px; color: var(--muted);">
+                                        No appointments recorded for this patient.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
