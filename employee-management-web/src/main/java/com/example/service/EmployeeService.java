@@ -303,6 +303,15 @@ public class EmployeeService
         return map;
     }
 
+    public Map<String, Long> getGenderDistribution() 
+    {
+        Map<String, Long> map = new LinkedHashMap<>();
+        map.put("Male", employees.stream().filter(e -> "Male".equalsIgnoreCase(e.getGender())).count());
+        map.put("Female", employees.stream().filter(e -> "Female".equalsIgnoreCase(e.getGender())).count());
+        map.put("Other", employees.stream().filter(e -> !"Male".equalsIgnoreCase(e.getGender()) && !"Female".equalsIgnoreCase(e.getGender())).count());
+        return map;
+    }
+
     public long getEmployeeCountForDepartment(Long deptId) 
     {
         return employees.stream()
